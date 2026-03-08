@@ -1,22 +1,57 @@
 version: '3.7'
 services:
+  config-init:
+    image: busybox
+    container_name: sharry_config_init
+    volumes:
+      - sharry_config:/config
+    command: >
+      sh -c 'cat > /config/sharry.conf << EOF
+      sharry.restserver {
+        base-url = "http://localhost:9090"
+        bind {
+          address = "0.0.0.0"
+          port = 9090
+        }
+        backend {
+          auth {
+            fixed.enabled = true
+          }
+          jdbc {
+            url = "jdbc:postgresql://db:5432/dbname"
+            user = "dbuser"
+            password = "dbpass"
+          }
+          signup {
+            mode = "open"
+            invite-time = "14 days"
+            invite-password = "generate-invite"
+          }
+        }
+      }
+      EOF'
+    restart: "no"
+
   restserver:
     image: eikek0/sharry:latest
     container_name: sharry
-    command: ["sh", "-c", "sleep infinity"]
+    command: /config/sharry.conf
     ports:
       - "9090:9090"
     volumes:
       - sharry_config:/config
+    depends_on:
+      config-init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --spider http://localhost:9090/api/v2/open/info/version"]
       interval: 1m
       timeout: 10m
       retries: 2
       start_period: 30s
-    depends_on:
-      db:
-        condition: service_healthy
+
   db:
     image: postgres:18.3
     container_name: postgres_db
@@ -33,6 +68,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
+
 volumes:
   postgres_data:
   sharry_config:
