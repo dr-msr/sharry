@@ -3,13 +3,11 @@ services:
   restserver:
     image: eikek0/sharry:latest
     container_name: sharry
-    command: /sharry.conf
-    expose:
-      - 9090 # informational only
+    command: /config/sharry.conf
     ports:
       - "9090:9090"
     volumes:
-      - ${PWD}/sharry.conf:/sharry.conf
+      - sharry_config:/config
     healthcheck:
       test: ["CMD-SHELL", "wget --spider http://localhost:9090/api/v2/open/info/version"]
       interval: 1m
@@ -25,15 +23,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     environment:
-        - POSTGRES_USER=dbuser
-        - POSTGRES_PASSWORD=dbpass
-        - POSTGRES_DB=dbname
-        - PGUSER=dbuser
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=dbpass
+      - POSTGRES_DB=dbname
+      - PGUSER=dbuser
     healthcheck:
       test: pg_isready -q -d dbname
       interval: 15s
-      timeout: 5s # pg_isready has a 3 second timeout by default so actually this doesn't matter very much
+      timeout: 5s
       retries: 3
       start_period: 15s
 volumes:
   postgres_data:
+  sharry_config:
