@@ -5,31 +5,11 @@ services:
     container_name: sharry_config_init
     volumes:
       - sharry_config:/config
-    command: >
-      sh -c 'cat > /config/sharry.conf << EOF
-      sharry.restserver {
-        base-url = "http://localhost:9090"
-        bind {
-          address = "0.0.0.0"
-          port = 9090
-        }
-        backend {
-          auth {
-            fixed.enabled = true
-          }
-          jdbc {
-            url = "jdbc:postgresql://db:5432/dbname"
-            user = "dbuser"
-            password = "dbpass"
-          }
-          signup {
-            mode = "open"
-            invite-time = "14 days"
-            invite-password = "generate-invite"
-          }
-        }
-      }
-      EOF'
+    command:
+      - sh
+      - -c
+      - |
+        printf 'sharry.restserver {\n  base-url = "http://localhost:9090"\n  bind {\n    address = "0.0.0.0"\n    port = 9090\n  }\n  backend {\n    auth {\n      fixed.enabled = true\n    }\n    jdbc {\n      url = "jdbc:postgresql://db:5432/dbname"\n      user = "dbuser"\n      password = "dbpass"\n    }\n    signup {\n      mode = "open"\n      invite-time = "14 days"\n      invite-password = "generate-invite"\n    }\n  }\n}\n' > /config/sharry.conf && echo "Config written" && cat /config/sharry.conf
     restart: "no"
 
   restserver:
