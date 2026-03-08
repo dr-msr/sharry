@@ -24,11 +24,11 @@ services:
     container_name: postgres_db
     volumes:
       - postgres_data:/var/lib/postgresql
-  environment:
-      - POSTGRES_USER=dbuser
-      - POSTGRES_PASSWORD=dbpass
-      - POSTGRES_DB=dbname
-      - PGUSER=dbuser
+    environment:
+        - POSTGRES_USER=dbuser
+        - POSTGRES_PASSWORD=dbpass
+        - POSTGRES_DB=dbname
+        - PGUSER=dbuser
     healthcheck:
       test: pg_isready -q -d dbname
       interval: 15s
